@@ -51,7 +51,7 @@ export async function calculateSubtotal(items: OrderItem[]) {
   for (const item of items) {
     const product = await get<Pick<Product, "price">>("SELECT price FROM products WHERE id = ?", [item.productId]);
     if (!product) throw new Error(`Product ${item.productId} not found`);
-    subtotal += product.price as unknown as number;
+    subtotal += Number(product.price) * item.quantity;
   }
   return subtotal;
 }

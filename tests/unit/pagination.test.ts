@@ -2,7 +2,7 @@ import { listProducts } from "../../backend/controllers/productController"
 
 
 describe("pagination", () => {
-    test("have one colled json.json", async () => {
+    test("have one colled res.json", async () => {
         const req = {
             query: {
                 page: "1",
