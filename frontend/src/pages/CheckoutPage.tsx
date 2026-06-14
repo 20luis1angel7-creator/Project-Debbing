@@ -15,13 +15,23 @@ export default function CheckoutPage({ cart, setCart }: CheckoutPageProps) {
 
   async function checkout() {
     setMessage("Procesando...");
-    const payload = { userId: 1, items: cart, couponCode, forcePaymentFail };
 
-    const orderPromise = apiPost("/orders", payload);
-    setCart([]);
-    setMessage("Orden creada");
+    try {
+      const payload = { 
+        userId: 1, 
+        items: cart, 
+        couponCode, 
+        forcePaymentFail 
+      };
+      await apiPost("/orders", payload);
 
-    orderPromise.catch(() => setMessage("Error creando la orden"));
+      setCart([]); 
+
+      setMessage("Orden creada");
+    } catch (err) {
+      console.error(err)
+      setMessage("Error creando la orden");
+    }
   }
 
   const subtotal = cart.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);

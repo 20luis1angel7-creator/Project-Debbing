@@ -11,5 +11,9 @@ export async function apiPost<T = unknown, B = unknown>(path: string, body: B): 
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body)
   });
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status}`);
+  }
   return response.json();
 }
