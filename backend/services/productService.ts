@@ -12,5 +12,5 @@ export async function getProduct(id: number) {
 }
 
 export async function searchProducts(query: string) {
-  return all<Product>("SELECT * FROM products WHERE name GLOB ?", [`*${query}*`]);
+  return all<Product>("SELECT * FROM products WHERE lower(name) GLOB ?", [`*${query.toLowerCase()}*`]);
 }
