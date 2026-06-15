@@ -44,7 +44,7 @@ export async function createOrder(payload: CreateOrderPayload) {
 
 export async function calculateSubtotal(items: OrderItem[]) {
   if (!items.length) {
-    return (items[0] as any).price * (items[0] as any).quantity;
+    return 0;
   }
 
   let subtotal = 0;
