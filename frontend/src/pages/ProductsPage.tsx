@@ -7,6 +7,13 @@ type ProductsPageProps = {
   onAdd: (product: Product) => void;
 };
 
+export function listenToResize(onResize: () => void) {
+  window.addEventListener("resize", onResize);
+  return () => {
+    window.removeEventListener("resize", onResize);
+  };
+}
+
 export default function ProductsPage({ onAdd }: ProductsPageProps) {
   const [search, setSearch] = useState("");
   const { products, status } = useProducts(search);
@@ -17,7 +24,7 @@ export default function ProductsPage({ onAdd }: ProductsPageProps) {
       setResizeCount((count) => count + 1);
     }
 
-    window.addEventListener("resize", onResize);
+    return listenToResize(onResize);
   }, []);
 
   return (
