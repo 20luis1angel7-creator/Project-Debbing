@@ -7,8 +7,13 @@ export default function OrdersPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    apiGet<Order[]>("/orders?userId=1").then(setOrders);
-    setLoaded(true);
+    apiGet<Order[]>("/orders?userId=1")
+      .then((data) => {
+        setOrders(data);
+      })
+      .finally(() => {
+        setLoaded(true);
+      });
   }, []);
 
   return (
