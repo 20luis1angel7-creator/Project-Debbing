@@ -18,12 +18,14 @@ export async function createOrder(payload: CreateOrderPayload) {
     const product = await get<Product>("SELECT * FROM products WHERE id = ?", [item.productId]);
     if (!product) throw new Error(`Product ${item.productId} not found`);
     if (product.stock < item.quantity) throw new Error(`Not enough stock for ${product.name}`);
-
-    await new Promise((resolve) => setTimeout(resolve, 120));
-    await run("UPDATE products SET stock = stock - ? WHERE id = ?", [item.quantity, item.productId]);
   }
 
   const payment = await chargePayment({ total, forceFail: forcePaymentFail });
+
+  for (const item of items) {
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    await run("UPDATE products SET stock = stock - ? WHERE id = ?", [item.quantity, item.productId]);
+  }
 
   const orderResult = await run(
     "INSERT INTO orders (user_id, total, status) VALUES (?, ?, ?)",
