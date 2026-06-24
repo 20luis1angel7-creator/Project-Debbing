@@ -24,7 +24,11 @@ export async function createOrder(payload: CreateOrderPayload) {
 
   for (const item of items) {
     await new Promise((resolve) => setTimeout(resolve, 120));
-    await run("UPDATE products SET stock = stock - ? WHERE id = ?", [item.quantity, item.productId]);
+    const result = await run("UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?", [item.quantity, item.productId, item.quantity]);
+
+    if (result.changes === 0) {
+      throw new Error("Not enough stock");
+    }
   }
 
   const orderResult = await run(
