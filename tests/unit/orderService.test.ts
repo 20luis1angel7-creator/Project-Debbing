@@ -1,5 +1,6 @@
 import { calculateSubtotal, createOrder } from "../../backend/services/orderService";
 import { get, run } from "../../backend/database/db";
+import { count } from "console";
 
 describe("calculateSubtotal", () => {
   test("converts prices to numbers and includes item quantity", async () => {
@@ -15,6 +16,9 @@ describe("calculateSubtotal", () => {
 describe("createOrder", () => {
   beforeEach(async () => {
     await run("UPDATE products SET stock = ? WHERE id = ?", [1, 1]);
+    await run("DELETE FROM invoices");
+    await run("DELETE FROM orders");
+    process.env.FORCE_INVOICE_FAIL = "true";
   });
 
   test("prevents simultaneous orders from making stock negative", async () => {
@@ -40,4 +44,30 @@ describe("createOrder", () => {
     expect(failed).toHaveLength(1);
     expect(product?.stock).toBe(0);
   });
+
+  test("invoice failed", async () => {
+    const beforeStock = await get<{ stock: number }>(
+      "SELECT stock FROM products WHERE id = ?",
+      [1]
+    )
+
+    await expect(
+      createOrder({
+        userId: 1,
+        items: [{ productId: 1, quantity: 1 }]
+      })
+    ).rejects.toThrow("Invoice provider unavailable")
+
+    const afterStock = await get<{ stock: number }>(
+      "SELECT stock FROM products WHERE is = ?",
+      [1]
+    )
+
+    const orders = await get("SELECT COUNT(*) as count FROM orders")
+    const invoices = await get("SELECT COUNT(*) as count FROM invoices")
+
+    expect(afterStock?.stock).toBe(beforeStock?.stock)
+    expect(orders).toEqual({ count: 0 })
+    expect(invoices).toEqual({ count: 0 })
+  })
 });
