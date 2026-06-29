@@ -12,4 +12,16 @@ describe("applyCoupon", () => {
     expect(result.discount).toBe(50);
     expect(result.total).toBe(850);
   });
+
+  test("successful", () => {
+    const result = applyCoupon(200, "DEBUG10")
+    expect(result.discount).toBe(20)
+    expect(result.total).toBe(180)
+  })
+
+  test("underfined couponCode", () => {
+    const result = applyCoupon(150)
+    expect(result.discount).toBe(0)
+    expect(result.total).toBe(150)
+  })
 });
