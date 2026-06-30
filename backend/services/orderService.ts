@@ -9,8 +9,12 @@ export async function listOrders(userId: number) {
 }
 
 export async function createOrder(payload: CreateOrderPayload) {
+  let transactionStarted = false
+
   try {
-   await run("BEGIN TRANSACTION")
+    await run("BEGIN TRANSACTION")
+    transactionStarted = true
+
     const { userId = 1, items = [], couponCode, forcePaymentFail = false } = payload;
 
     const subtotal = await calculateSubtotal(items);
@@ -31,7 +35,8 @@ export async function createOrder(payload: CreateOrderPayload) {
           WHERE id = ? 
           AND stock >= ?
         `, 
-        [item.quantity, item.productId, item.quantity]);
+        [item.quantity, item.productId, item.quantity]
+      );
 
       if (result.changes === 0) {
         throw new Error("Not enough stock");
@@ -43,14 +48,15 @@ export async function createOrder(payload: CreateOrderPayload) {
       [userId, total, "paid"]
     );
 
+    const payment = await chargePayment({ total, forceFail: forcePaymentFail });
+
     await createInvoice(
       orderResult.id, 
       total
     );
 
     await run("COMMIT")
-
-    const payment = await chargePayment({ total, forceFail: forcePaymentFail });
+    transactionStarted = false
 
     return {
       id: orderResult.id,
@@ -58,11 +64,12 @@ export async function createOrder(payload: CreateOrderPayload) {
       total,
       discount,
       payment
-      // invoice
     };
 
   }catch(err) {
-    await run("ROLLBACK")
+    if (transactionStarted) {
+      await run("ROLLBACK")
+    }
     throw err
   }
 }

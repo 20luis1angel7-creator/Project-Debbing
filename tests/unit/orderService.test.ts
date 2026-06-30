@@ -1,6 +1,5 @@
 import { calculateSubtotal, createOrder } from "../../backend/services/orderService";
 import { get, run } from "../../backend/database/db";
-import { count } from "console";
 
 describe("calculateSubtotal", () => {
   test("converts prices to numbers and includes item quantity", async () => {
@@ -18,7 +17,7 @@ describe("createOrder", () => {
     await run("UPDATE products SET stock = ? WHERE id = ?", [1, 1]);
     await run("DELETE FROM invoices");
     await run("DELETE FROM orders");
-    process.env.FORCE_INVOICE_FAIL = "true";
+    process.env.FORCE_INVOICE_FAIL = "false";
   });
 
   test("prevents simultaneous orders from making stock negative", async () => {
@@ -46,6 +45,8 @@ describe("createOrder", () => {
   });
 
   test("invoice failed", async () => {
+    process.env.FORCE_INVOICE_FAIL = "true"
+    
     const beforeStock = await get<{ stock: number }>(
       "SELECT stock FROM products WHERE id = ?",
       [1]
@@ -59,7 +60,7 @@ describe("createOrder", () => {
     ).rejects.toThrow("Invoice provider unavailable")
 
     const afterStock = await get<{ stock: number }>(
-      "SELECT stock FROM products WHERE is = ?",
+      "SELECT stock FROM products WHERE id = ?",
       [1]
     )
 

@@ -24,10 +24,10 @@ describe("getProfile", () => {
 describe("cors", () => {
     test("keep get from mi:app", async () => {
         const res = await request(app)
-            .get("/api/users")
+            .get("/api/users/1")
             .set("Origin", "http://localhost:5173")
 
-        expect(res.headers["Access-control-allow-origin"])
+        expect(res.headers["access-control-allow-origin"])
             .toBe("http://localhost:5173")
     })
     test("Unauthorized request are blocked", async () => {

@@ -33,6 +33,10 @@ describe("pagination", () => {
 
         await listProducts(req as any, res as any, next)
 
-        expect(res).toHaveBeenCalledWith([])
+        expect(res.json).toHaveBeenCalledWith(
+            expect.arrayContaining([
+                expect.objectContaining({ id: 1, name: "Laptop Pro 14" })
+            ])
+        )
     })
 })

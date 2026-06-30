@@ -38,7 +38,7 @@ async function seed() {
   `);
 
   await run(`
-    CREATE TABLE invoices (
+    CREATE TABLE IF NOT EXISTS invoices (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       order_id INTEGER NOT NULL,
       invoice_number TEXT NOT NULL,
